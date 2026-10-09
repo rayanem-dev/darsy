@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Darsy+</title>
-<link rel="manifest" href="manifest.json?v=2026.10.15.1">
+<link rel="manifest" href="manifest.json?v=2026.10.16.1">
 <meta name="theme-color" content="#3b5bdb">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.15.1">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.15.1">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.15.1">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.16.1">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.16.1">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.16.1">
 <link rel="stylesheet" href="basdepage.css">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -299,6 +299,7 @@
   .dt.f{background:var(--ok);border-color:var(--ok)}
   .dt.p{background:var(--k-e7ecff)}
   .dt.f.np{box-shadow:0 0 0 2px var(--warn)}
+  .dt.c{border:2px dashed var(--warn);background:#fff7ed}
   .dt.r{background:#ffe3e3;border-color:#fa5252}
   .dt.x{border-color:#adb5bd;background:linear-gradient(135deg,#f1f3f5 42%,#adb5bd 42%,#adb5bd 58%,#f1f3f5 58%);opacity:.8}
   .dt.e{border-style:dashed;border-color:#ced4da}
@@ -463,10 +464,10 @@ var PALETTE=(function(){
 <script src="basdepage.js"></script>
 <script>
 var DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbztgTfXpHNmpSmF4wXVNbv7LqFXVeSNW2N08xux8FYyjLW_jhjolPIxQTBDjHbAFU_1/exec';
-var APP_VERSION='2026.10.15.1';
+var APP_VERSION='2026.10.16.1';
 // Version MINIMALE du serveur (Code.gs) dont ce site a besoin (reprogrammation des séances, gestes, horaire par séance…).
 // À relever quand une nouveauté dépend du serveur ; sous cette version, un avertissement s'affiche en haut de l'appli.
-var MIN_SERVER='2026.10.15.1';
+var MIN_SERVER='2026.10.16.1';
 var D = {enfants:[], cours:[], seances:[], paiements:[], ecole:[], config:{emailPere:'',emailMere:'',emailChauffeur:'',veille:false,matin:false,uneHeure:false,ecoleAgenda:false,ecoleAlerte:false,rappelFin:true,alertePaiement:true}};
 var tab = 'home', fCours = '', fMonth = today().slice(0,7), bEdited = false;
 var STAT = ['Prévue','Faite','Ratée','Annulée','Reportée'];
@@ -475,7 +476,7 @@ function compteSession(x){return x.Statut==='Faite'||x.Statut==='Prévue'||x.Sta
 var DAYS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']; // la semaine commence le dimanche
 var DOW = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 var PAL = ['var(--k-3b5bdb)','#e8590c','#2f9e44','#ae3ec9','#0c8599','#c2255c'];
-var TABS = [['home','Accueil','🏠'],['seances','Séances','✅'],['sessions','Sessions','🗂️'],['paie','Paiements','💳'],['cal','Calendrier','📅'],['sujet','Sujets','📝']]; // Réglages : engrenage dans l'en-tête
+var TABS = [['home','Accueil','🏠'],['seances','Séances','✅'],['sessions','Sessions','🗂️'],['paie','Paiements','💳'],['cal','Calendrier','📅'],['chauffeur','Chauffeur','🚕'],['sujet','Sujets','📝']]; // Réglages : engrenage dans l'en-tête
 // (Aucune photo par défaut : seules les photos téléversées par l'utilisateur lui-même (📷 Changer la photo) sont affichées.)
 
 function p2(n){return String(n).padStart(2,'0');}
@@ -910,7 +911,7 @@ function render(){
   formDirty=false;
   CY={};
   if(fCours&&!D.cours.some(function(c){return same(c.ID,fCours);}))fCours='';
-  document.getElementById('tabs').innerHTML=TABS.filter(function(t){return t[0]!=='sujet'||LEGACY_MODE||(ME&&ME.sujets);}).map(function(t){
+  document.getElementById('tabs').innerHTML=TABS.filter(function(t){if(t[0]==='chauffeur')return !!D.chauffeur;return t[0]!=='sujet'||LEGACY_MODE||(ME&&ME.sujets);}).map(function(t){
     return '<button class="'+(tab===t[0]?'on':'')+'" onclick="tab=\''+t[0]+'\';render()"><span class="ni">'+t[2]+'</span><span class="nt">'+t[1]+'</span></button>';}).join('');
   var g=document.getElementById('bt-set');if(g)g.className='aide'+(tab==='set'?' on':'');
   var h='';
@@ -919,6 +920,7 @@ function render(){
   if(tab==='sessions')h=vSessions();
   if(tab==='seances')h=vSeances();
   if(tab==='paie')h=vPaie();
+  if(tab==='chauffeur')h=vChauffeur();
   if(tab==='sujet')h=vSujet();
   if(tab==='set')h=vSet();
   var app=document.getElementById('app');
@@ -2038,6 +2040,7 @@ function donnerAccesChauffeur_(){
 }
 function delPaieChauffeur_(id){
   if(!confirm('Annuler ce paiement ? Les trajets redeviennent « à payer ».'))return;
+  CH_DATA=null;
   call('supprimerPaiementChauffeur',id);
 }
 function openPayerChauffeur_(){
@@ -2063,7 +2066,7 @@ function apercuPc_(){
 function payerPc_(){
   var p=periodePc_();
   busy_(true);
-  apiCall('payerChauffeur',p).then(function(d){busy_(false);setD(d);cacheData();closeM();render();showToast('Chauffeur payé',null,null,3000);},
+  apiCall('payerChauffeur',p).then(function(d){busy_(false);CH_DATA=null;setD(d);cacheData();closeM();render();showToast('Chauffeur payé',null,null,3000);},
     function(e){busy_(false);alert(e.message||e);});
 }
 /** Carte « Chauffeur » du tableau de bord famille. */
@@ -2071,18 +2074,71 @@ function chauffeurDash_(){
   var ch=D.chauffeur;if(!ch||!(ch.tarif||ch.aPayer.n||ch.semaine.n))return '';
   return '<div class="card" style="margin-bottom:12px"><div class="row"><span class="em" style="font-size:22px">🚕</span><div class="grow"><b>Chauffeur</b>'
     +'<div class="sub"><span>Cette semaine :</span> <b>'+ch.semaine.n+' trajet(s) · '+fmt(ch.semaine.montant)+'</b> · '+(ch.aPayer.n?'<b style="color:var(--warn)"><span>À payer :</span> '+fmt(ch.aPayer.montant)+'</b>':'<b style="color:var(--ok)">Tout est payé ✓</b>')+' · <span>Payé ce mois :</span> '+fmt(ch.payeMois)+'</div></div>'
-    +(ch.aPayer.n?'<button class="b p" onclick="openPayerChauffeur_()">Payer</button>':'')+'</div>'+pastillesChauffeur_(ch.pastilles)+'</div>';
+    +(ch.aPayer.n?'<button class="b p" onclick="openPayerChauffeur_()">Payer</button>':'')+'</div>'+(ch.aConfirmer?'<div class="warnline" style="margin-top:6px">❓ '+ch.aConfirmer+' trajet(s) à confirmer · <a onclick="tab=\'chauffeur\';render()">Voir et confirmer</a></div>':'')+pastillesChauffeur_(ch.pastilles)+'</div>';
 }
 
 /** Pastilles des trajets du mois : vert = fait par le chauffeur (cerclé d'orange tant qu'il n'est pas payé), barré = pas fait par le chauffeur, clair = à faire. */
 function pastillesChauffeur_(l){
   if(!l||!l.length)return '';
-  var fait=l.filter(function(p){return p.etat==='paye'||p.etat==='fait';}).length, manque=l.filter(function(p){return p.etat==='manque';}).length, prevu=l.filter(function(p){return p.etat==='prevu';}).length;
+  var conf=l.filter(function(p){return p.etat==='confirmer';}).length, fait=l.filter(function(p){return p.etat==='paye'||p.etat==='fait';}).length, manque=l.filter(function(p){return p.etat==='manque';}).length, prevu=l.filter(function(p){return p.etat==='prevu';}).length;
   var dots=l.map(function(p){
-    var cl=p.etat==='manque'?'x':p.etat==='prevu'?'p':'f'+(p.etat==='fait'?' np':'');
-    var lib=p.etat==='paye'?'fait et payé':p.etat==='fait'?'fait, à payer':p.etat==='manque'?'pas fait par le chauffeur':'à faire';
+    var cl=p.etat==='manque'?'x':p.etat==='prevu'?'p':p.etat==='confirmer'?'c':'f'+(p.etat==='fait'?' np':'');
+    var lib=p.etat==='paye'?'fait et payé':p.etat==='fait'?'fait, à payer':p.etat==='manque'?'pas fait par le chauffeur':p.etat==='confirmer'?'à confirmer':'à faire';
     return '<i class="dt '+cl+'" title="'+esc(fd(p.date)+' · '+lib)+'"></i>';}).join('');
-  return '<div class="dotsrow" style="margin:6px 0"><div class="dots">'+dots+'</div><b>'+fait+' fait'+(fait>1?'s':'')+(manque?' · '+manque+' non effectué'+(manque>1?'s':''):'')+' · '+prevu+' à faire</b></div>';
+  return '<div class="dotsrow" style="margin:6px 0"><div class="dots">'+dots+'</div><b>'+fait+' fait'+(fait>1?'s':'')+(manque?' · '+manque+' non effectué'+(manque>1?'s':''):'')+(conf?' · '+conf+' à confirmer':'')+' · '+prevu+' à faire</b></div>';
+}
+
+
+// ===== Page « Chauffeur » de la famille : historique des trajets, confirmation et correction =====
+var CH_DATA=null, CH_MOIS='';
+function chargerTrajets_(){
+  apiCall('listeTrajets',[]).then(function(r){CH_DATA=r;if(tab==='chauffeur')render();},function(e){if(tab==='chauffeur'){var a=document.getElementById('app');if(a)a.innerHTML='<div class="card"><div class="empty">'+esc(e.message||e)+'</div></div>';}});
+}
+function setTrajets_(el,val){
+  var ids=String(el.dataset.ids||'').split(',').filter(Boolean);
+  busy_(true);
+  apiCall('definirTrajets',[ids,val]).then(function(d){busy_(false);setD(d);cacheData();CH_DATA=null;render();},function(e){busy_(false);alert(e.message||e);});
+}
+function confirmerTousTrajets_(){
+  if(!CH_DATA)return;
+  var ids=[];CH_DATA.trajets.forEach(function(x){if(x.aConfirmer)ids=ids.concat(x.ids);});
+  if(!ids.length)return;
+  if(!confirm('Confirmer que le chauffeur a ramené les enfants pour les '+CH_DATA.trajets.filter(function(x){return x.aConfirmer;}).length+' trajet(s) à confirmer ? Ils deviendront payables.'))return;
+  busy_(true);
+  apiCall('definirTrajets',[ids,'oui']).then(function(d){busy_(false);setD(d);cacheData();CH_DATA=null;render();},function(e){busy_(false);alert(e.message||e);});
+}
+function vChauffeur(){
+  if(!D.chauffeur)return '<div class="card"><div class="empty">Aucun cours n\'utilise le chauffeur. Coche « 🚕 Prévenir le chauffeur » sur la fiche d\'un cours (Réglages).</div></div>';
+  if(!CH_DATA){chargerTrajets_();return '<div class="empty">Chargement…</div>';}
+  var ch=D.chauffeur, tr=CH_DATA.trajets, mois={};
+  tr.forEach(function(x){mois[x.date.slice(0,7)]=1;});
+  var mm=Object.keys(mois).sort().reverse(), cur=today().slice(0,7);
+  if(!CH_MOIS||!mois[CH_MOIS])CH_MOIS=mois[cur]?cur:(mm[0]||'');
+  var nbConf=tr.filter(function(x){return x.aConfirmer;}).length;
+  var liste=tr.filter(function(x){return x.date.slice(0,7)===CH_MOIS;});
+  var etat=function(x){
+    if(x.prevu)return '<span class="sub">À faire</span>';
+    if(x.paye)return '<span class="badge" style="background:var(--ok);color:#fff"><span>✅ Payé le</span> '+esc(fs(x.payeLe))+'</span>';
+    if(x.faite)return '<span class="badge" style="background:var(--ok);color:#fff">🚕 Fait par le chauffeur</span>';
+    if(x.manque)return '<span class="badge">🚫 Pas le chauffeur</span>';
+    return '<span class="badge" style="background:var(--warn);color:#fff">❓ À confirmer</span>';
+  };
+  var actions=function(x){
+    if(x.prevu||x.paye||!x.ids.length)return '';
+    var a=x.ids.join(',');
+    return '<div class="actions" style="margin:4px 0 0;justify-content:flex-start"><button class="b'+(x.faite?' p':'')+'" data-ids="'+a+'" onclick="setTrajets_(this,\'oui\')">🚕 Fait par le chauffeur</button>'
+      +'<button class="b'+(x.manque?' p':'')+'" data-ids="'+a+'" onclick="setTrajets_(this,\'non\')">Pas le chauffeur</button></div>';
+  };
+  return '<div class="card"><div class="row"><span class="em" style="font-size:24px">🚕</span><div class="grow"><b>Trajets du chauffeur</b>'
+      +'<div class="sub">Tarif : '+(CH_DATA.tarif?fmt(CH_DATA.tarif)+' par trajet':'non réglé')+' · <b style="color:'+(ch.aPayer.n?'var(--warn)':'var(--ok)')+'">À payer : '+fmt(ch.aPayer.montant)+' ('+ch.aPayer.n+' trajet(s))</b></div></div>'
+      +(ch.aPayer.n?'<button class="b p" onclick="openPayerChauffeur_()">💳 Payer</button>':'')+'</div>'
+    +(nbConf?'<div class="warnline" style="margin-top:8px">❓ '+nbConf+' trajet(s) à confirmer : seuls les trajets que tu confirmes comme faits par le chauffeur sont payables. <a onclick="confirmerTousTrajets_()">Tout confirmer comme fait par lui</a></div>':'')
+    +'<label>Mois</label><select onchange="CH_MOIS=this.value;render()">'+mm.map(function(m){return '<option value="'+m+'"'+(m===CH_MOIS?' selected':'')+'>'+esc(new Date(m+'-15T12:00').toLocaleDateString(I18N.locale(),{month:'long',year:'numeric'}))+'</option>';}).join('')+'</select></div>'
+    +'<div class="card"><h3 style="margin:0 0 6px">Trajets du mois</h3>'+(liste.length?liste.map(function(x){
+      return '<div class="drow" style="align-items:flex-start"><div class="grow"><b>'+esc(fd(x.date))+' · '+esc(String(x.heure||'').replace('-',' → '))+'</b>'
+        +'<div class="sub"><span dir="auto" data-notr>'+esc((x.enfants||[]).join(' & '))+'</span>'+(x.lieu?' · 📍 <span dir="auto" data-notr>'+esc(x.lieu)+'</span>':'')+'</div>'+actions(x)+'</div>'+etat(x)+'</div>';}).join(''):'<div class="empty">Aucun trajet ce mois-ci.</div>')+'</div>'
+    +(CH_DATA.paiements.length?'<div class="card"><h3 style="margin:0 0 6px">Paiements au chauffeur</h3>'+CH_DATA.paiements.map(function(p){
+      return '<div class="row"><div class="grow"><b>'+fmt(p.Montant)+'</b><div class="sub">'+esc(fd(p.Date))+' · '+p.Trajets+' trajet(s) · '+esc(fs(p.Debut))+' → '+esc(fs(p.Fin))+'</div></div><button class="b d" title="Annuler ce paiement" onclick="delPaieChauffeur_(\''+p.ID+'\')">✕</button></div>';}).join('')+'</div>':'');
 }
 
 // ===== Espace du chauffeur (compte de rôle « chauffeur ») =====
@@ -2099,11 +2155,11 @@ function bilanMoisHtml_(b,tarif){
   if(!b)return '';
   var l=function(ico,txt,x,col){return '<div class="drow"><div class="grow"><span>'+ico+' '+txt+'</span><div class="sub">'+x.n+' trajet(s)</div></div><b'+(col?' style="color:'+col+'"':'')+'>'+(tarif?fmt(x.montant):'—')+'</b></div>';};
   return '<div class="card"><h3 style="margin:0 0 6px">Ce mois-ci</h3>'
-    +l('✔️','Effectués',b.effectues)+l('✅','Déjà payés',b.payes,'var(--ok)')+l('⏳','Reste à payer',b.reste,b.reste.n?'var(--warn)':'')+l('📅','À venir',b.aVenir)+(b.nonEffectues&&b.nonEffectues.n?l('🚫','Non effectués',{n:b.nonEffectues.n,montant:0}):'')+l('🧮','Total prévu',b.prevu)+'</div>';
+    +l('✔️','Effectués',b.effectues)+l('✅','Déjà payés',b.payes,'var(--ok)')+l('⏳','Reste à payer',b.reste,b.reste.n?'var(--warn)':'')+l('📅','À venir',b.aVenir)+(b.nonEffectues&&b.nonEffectues.n?l('🚫','Non effectués',{n:b.nonEffectues.n,montant:0}):'')+(b.aConfirmer&&b.aConfirmer.n?l('❓','En attente de confirmation',{n:b.aConfirmer.n,montant:0}):'')+l('🧮','Total prévu',b.prevu)+'</div>';
 }
 function trajetLigne_(x){
   var bd=function(txt,col){return '<span style="white-space:nowrap;font-size:12.5px;padding:3px 9px;border-radius:999px;border:1px solid '+(col||'var(--bd)')+';color:'+(col||'var(--mut)')+'">'+txt+'</span>';};
-  var etat=x.manque?bd('Non effectué'):x.faite?(x.paye?bd('<span>✅ Payé le</span> '+esc(x.payeLe?fs(x.payeLe):''),'var(--ok)'):bd('⏳ À recevoir','var(--warn)')):bd(x.date<today()?'À confirmer':'À faire');
+  var etat=x.manque?bd('Non effectué'):x.confirmer?bd('⏳ En attente de confirmation'):x.faite?(x.paye?bd('<span>✅ Payé le</span> '+esc(x.payeLe?fs(x.payeLe):''),'var(--ok)'):bd('⏳ À recevoir','var(--warn)')):bd(x.date<today()?'À confirmer':'À faire');
   return '<div class="drow"><div class="grow"><b>'+esc(fd(x.date))+' · '+esc(String(x.heure||'').replace('-',' → '))+'</b>'
     +'<div class="sub"><span dir="auto" data-notr>'+esc((x.enfants||[]).join(' & '))+'</span>'+(x.lieu?' · 📍 <span dir="auto" data-notr>'+esc(x.lieu)+'</span>':'')+'</div></div>'+etat+'</div>';
 }
@@ -2815,6 +2871,7 @@ function aideRender_(){
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAide();});
 var NOUVEAUTES=[
+  ['2026.10.16','Chauffeur : nouvelle page « Chauffeur » pour relire l\'historique des trajets et les corriger. Seuls les trajets que tu confirmes comme faits par le chauffeur sont payables : les séances déjà cochées avant sont « à confirmer » (bouton « Tout confirmer » ou un par un).'],
   ['2026.10.15','Alerte « la veille » : l\'heure se choisit dans les Réglages (20h00 par défaut). Pour les séances déjà dans l\'agenda : « Tout resynchroniser ».'],
   ['2026.10.14','Chauffeur : des pastilles montrent les trajets du mois (vert = fait par le chauffeur, cerclé d\'orange tant qu\'il n\'est pas payé, barré = pas fait par lui, clair = à faire), sur l\'accueil de la famille et dans l\'espace du chauffeur, qui voit aussi les trajets non effectués.'],
   ['2026.10.14','Séances : quand tu valides une séance d\'un cours avec chauffeur, l\'appli demande si c\'est bien le chauffeur qui a ramené les enfants (sinon aucun trajet n\'est compté). Et les séances prévues suivent le programme du cours : si un jour est retiré, l\'appli propose de supprimer les séances prévues ce jour-là.'],
