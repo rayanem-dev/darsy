@@ -1,0 +1,29 @@
+/* basdepage — pied de page + préférences (langue, thème clair/sombre). Aucune dépendance.
+ * Couleurs : variables --bdp-* (valeurs par défaut = palette Sijil). Pour s'accorder à un autre site, redéfinir --bdp-* dans :root. */
+:root {
+  --bdp-accent: #16598D; --bdp-on-accent: #fff; --bdp-card: #fff; --bdp-ink: #1d2733; --bdp-muted: #6b7785; --bdp-line: #d9dfe5;
+}
+:root[data-theme="dark"] {
+  --bdp-accent: #2FB5B4; --bdp-on-accent: #06222A; --bdp-card: #13283B; --bdp-ink: #E8EEF3; --bdp-muted: #9DB0C2; --bdp-line: #27415A;
+}
+/* pied de page : texte centré, liens soulignés */
+.bdp-foot { text-align: center; padding: 14px; font-size: .8rem; color: var(--bdp-muted); line-height: 1.6; }
+.bdp-foot a { color: inherit; }
+.bdp-foot .bdp-etat { text-decoration: none; }
+/* préférences discrètes en bas à droite */
+.bdp-prefs { position: fixed; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 30; display: flex; gap: 6px; align-items: center; direction: ltr; }
+.bdp-prefs label.bdp-pf { margin: 0; }
+.bdp-prefs .bdp-pf { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border: 1px solid var(--bdp-accent); border-radius: 14px; background: var(--bdp-card); color: var(--bdp-accent); font: inherit; font-size: .78rem; opacity: .85; box-sizing: border-box; }
+.bdp-prefs .bdp-pf:hover, .bdp-prefs .bdp-pf:focus-within { opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.bdp-prefs svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.bdp-prefs select { width: auto; border: 0; background: transparent; color: inherit; padding: 0 2px; margin: 0; font: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; }
+.bdp-prefs select option { color: var(--bdp-ink); background: var(--bdp-card); }
+.bdp-prefs button.bdp-pf { padding: 0 6px; cursor: pointer; width: 46px; justify-content: space-between; position: relative; }
+.bdp-prefs .bdp-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--bdp-accent); transition: transform .18s; }
+.bdp-prefs button[aria-pressed="true"] .bdp-knob { transform: translateX(18px); }
+.bdp-prefs button.bdp-pf svg { position: relative; z-index: 1; width: 13px; height: 13px; }
+.bdp-prefs .bdp-sun { color: var(--bdp-on-accent); } .bdp-prefs .bdp-moon { color: var(--bdp-accent); }
+.bdp-prefs button[aria-pressed="true"] .bdp-sun { color: var(--bdp-accent); } .bdp-prefs button[aria-pressed="true"] .bdp-moon { color: var(--bdp-on-accent); }
+body.bdp-avec-prefs { padding-bottom: 46px; } /* évite que les préférences masquent le bas de la page */
+@media print { .bdp-prefs { display: none; } }
+@media (prefers-reduced-motion: reduce) { .bdp-prefs .bdp-knob { transition: none; } }
