@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Darsy+</title>
-<link rel="manifest" href="manifest.json?v=2026.10.16.3">
+<link rel="manifest" href="manifest.json?v=2026.10.16.4">
 <meta name="theme-color" content="#3b5bdb">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.16.3">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.16.3">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.16.3">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.16.4">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.16.4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.16.4">
 <link rel="stylesheet" href="basdepage.css">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -464,10 +464,10 @@ var PALETTE=(function(){
 <script src="basdepage.js"></script>
 <script>
 var DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbztgTfXpHNmpSmF4wXVNbv7LqFXVeSNW2N08xux8FYyjLW_jhjolPIxQTBDjHbAFU_1/exec';
-var APP_VERSION='2026.10.16.3';
+var APP_VERSION='2026.10.16.4';
 // Version MINIMALE du serveur (Code.gs) dont ce site a besoin (reprogrammation des séances, gestes, horaire par séance…).
 // À relever quand une nouveauté dépend du serveur ; sous cette version, un avertissement s'affiche en haut de l'appli.
-var MIN_SERVER='2026.10.16.3';
+var MIN_SERVER='2026.10.16.4';
 var D = {enfants:[], cours:[], seances:[], paiements:[], ecole:[], config:{emailPere:'',emailMere:'',emailChauffeur:'',veille:false,matin:false,uneHeure:false,ecoleAgenda:false,ecoleAlerte:false,rappelFin:true,alertePaiement:true}};
 var tab = 'home', fCours = '', fMonth = today().slice(0,7), bEdited = false;
 var STAT = ['Prévue','Faite','Ratée','Annulée','Reportée'];
@@ -891,7 +891,7 @@ function nextDate(c,after){
   D.seances.forEach(function(x){if(same(x.CoursID,c.ID)&&x.Statut!=='Annulée'&&x.Statut!=='Reportée')taken[String(x.Date).slice(0,10)]=1;});
   var t=today(), from=String(after).slice(0,10)>t?String(after).slice(0,10):t;
   for(var i=1;i<=30;i++){var d=addDays(from,i);if(days.indexOf(dowName(d))>=0&&!taken[d])return d;}
-  return addDays(from,1);
+  return ''; // aucun jour habituel : on ne devine pas une date, c'est à toi de la choisir
 }
 
 // Formulaires de Réglages : si des champs ont été modifiés mais pas encore enregistrés, un rafraîchissement
@@ -2345,7 +2345,7 @@ function openReport(id){
   showM('<h2>Séance non faite</h2><div class="sub">'+esc(cname(c))+' · '+esc(fd(s.Date))+'</div>'
    +'<label class="chk"><input type="radio" name="rp" value="report" checked> Reporter à une autre date</label>'
    +'<input id="r-d" type="date" value="'+nextDate(c,s.Date)+'" onfocus="document.querySelector(\'input[name=rp][value=report]\').checked=true">'
-   +'<div class="sub" style="margin-top:4px">La date proposée est le prochain jour habituel du cours. Modifie-la si besoin.</div>'
+   +'<div class="sub" style="margin-top:4px">'+(nextDate(c,s.Date)?'La date proposée est le prochain jour habituel du cours. Modifie-la si besoin.':'⚠️ Aucun jour habituel libre dans les 30 prochains jours (déjà tous pris par d\'autres séances) : choisis la date toi-même.')+'</div>'
    +'<label class="chk"><input type="radio" name="rp" value="annule"> Annuler sans la remplacer</label>'
    +'<div class="actions"><button class="b p" onclick="okReport(\''+id+'\')">Confirmer</button><button class="b" onclick="closeM()">Retour</button></div>');
 }
@@ -2881,6 +2881,7 @@ function aideRender_(){
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAide();});
 var NOUVEAUTES=[
+  ['2026.10.17','Séance non faite : si le cours n\'a aucun jour habituel, l\'appli ne propose plus une date au hasard (le lendemain) : tu choisis la date.'],
   ['2026.10.17','Chauffeur : quand tu changes son e-mail, les trajets à venir de l\'agenda passent à la nouvelle adresse (l\'ancienne n\'est plus invitée) ; bouton « Remplacer l\'ancien invité » si l\'e-mail avait déjà été changé.'],
   ['2026.10.16','Chauffeur : nouvelle page « Chauffeur » pour relire l\'historique des trajets et les corriger. Seuls les trajets que tu confirmes comme faits par le chauffeur sont payables : les séances déjà cochées avant sont « à confirmer » (bouton « Tout confirmer » ou un par un).'],
   ['2026.10.15','Alerte « la veille » : l\'heure se choisit dans les Réglages (20h00 par défaut). Pour les séances déjà dans l\'agenda : « Tout resynchroniser ».'],
