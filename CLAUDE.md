@@ -1,5 +1,6 @@
 # Coursup — habitudes du projet
 
+- **Périmètre :** cette conversation concerne **uniquement Darsy+** (dépôts `darsy` et `darsy-prive`). Siraj (`da3m`, `da3m-site`) et `sijil-pro` sont d'autres applis, traitées dans leurs propres conversations : ne pas y toucher ici, et si une demande semble viser une autre appli, le dire et demander avant d'agir.
 - **Livraison :** après chaque série de modifications, pousser la branche de travail, créer la pull request vers `main` et la **fusionner directement** (autorisation permanente du propriétaire, pas besoin de redemander).
 - **Nom :** l'application s'appelle **Darsy+** (ex-Coursup). Dépôts : `rayanem-dev/darsy` (public, GitHub Pages : https://rayanem-dev.github.io/darsy/) et `rayanem-dev/darsy-prive` (privé).
 - **Comptes :** un seul site, une seule adresse. Écran de connexion / inscription ; l'admin arrive sur son tableau de bord (servi par le serveur, jamais présent dans ce dépôt public), les clients sur leur Darsy+. Jeton de session dans `localStorage` (`darsy_token`). Si le serveur est ancien (sans comptes), le site fonctionne comme avant (mode « legacy »). Aucune donnée, clé ni code d'administration ne doit être ajouté ici.
