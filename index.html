@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Darsy+</title>
-<link rel="manifest" href="manifest.json?v=2026.10.16.2">
+<link rel="manifest" href="manifest.json?v=2026.10.16.3">
 <meta name="theme-color" content="#3b5bdb">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.16.2">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.16.2">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.16.2">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2026.10.16.3">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2026.10.16.3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026.10.16.3">
 <link rel="stylesheet" href="basdepage.css">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -464,10 +464,10 @@ var PALETTE=(function(){
 <script src="basdepage.js"></script>
 <script>
 var DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbztgTfXpHNmpSmF4wXVNbv7LqFXVeSNW2N08xux8FYyjLW_jhjolPIxQTBDjHbAFU_1/exec';
-var APP_VERSION='2026.10.16.2';
+var APP_VERSION='2026.10.16.3';
 // Version MINIMALE du serveur (Code.gs) dont ce site a besoin (reprogrammation des séances, gestes, horaire par séance…).
 // À relever quand une nouveauté dépend du serveur ; sous cette version, un avertissement s'affiche en haut de l'appli.
-var MIN_SERVER='2026.10.16.2';
+var MIN_SERVER='2026.10.16.3';
 var D = {enfants:[], cours:[], seances:[], paiements:[], ecole:[], config:{emailPere:'',emailMere:'',emailChauffeur:'',veille:false,matin:false,uneHeure:false,ecoleAgenda:false,ecoleAlerte:false,rappelFin:true,alertePaiement:true}};
 var tab = 'home', fCours = '', fMonth = today().slice(0,7), bEdited = false;
 var STAT = ['Prévue','Faite','Ratée','Annulée','Reportée'];
@@ -2015,7 +2015,9 @@ function chauffeurCard_(){
     +'<div class="sub">Un seul montant par trajet. Deux enfants au même cours, même heure : un seul trajet.</div>'
     +'<div class="actions"><button class="b p" onclick="saveConfigForm()">Enregistrer</button>'
     +(acces?'<button class="b" onclick="donnerAccesChauffeur_()">📧 Donner un accès à son espace</button>':'')
-    +'<button class="b" onclick="testChauffeurNow()">🚕 Tester l\'envoi au chauffeur</button></div>'
+    +'<button class="b" onclick="testChauffeurNow()">🚕 Tester l\'envoi au chauffeur</button>'
+    +'<button class="b" onclick="remplacerAncienInvite_()">🔁 Remplacer l\'ancien invité</button></div>'
+    +'<div class="sub">Quand tu changes l\'e-mail du chauffeur, les trajets à venir de l\'agenda passent automatiquement à la nouvelle adresse. Si tu l\'avais déjà changé avant, utilise « Remplacer l\'ancien invité ».</div>'
     +'<div id="chf-acces"></div>'
     +(ch?'<div class="sub" style="margin-top:10px"><b>À payer :</b> '+ch.aPayer.n+' trajet(s) · '+fmt(ch.aPayer.montant)+'<br><b>Cette semaine :</b> '+ch.semaine.n+' trajet(s) · '+fmt(ch.semaine.montant)+'</div>'
       +'<div class="actions"><button class="b p" onclick="openPayerChauffeur_()">💳 Payer le chauffeur</button></div>'
@@ -2030,6 +2032,14 @@ function majChauffeurAcces_(){
     return '<div class="row" style="margin-top:6px"><div class="grow"><b>'+esc(m.Nom||m.Email)+'</b><div class="sub">'+esc(m.Email)+' · '+(m.Statut==='invite'?'Invitation envoyée, en attente':'Accès actif')+'</div></div>'
       +(m.Statut==='invite'?'<button class="b" onclick="renvoyerInv_(\''+m.ID+'\')">Renvoyer</button>':'')
       +'<button class="b d" onclick="retirerInv_(\''+m.ID+'\')">Retirer</button></div>';}).join('');
+}
+function remplacerAncienInvite_(){
+  var nouveau=(D.config&&D.config.emailChauffeur)||'';
+  if(!nouveau){alert('Enregistre d\'abord le nouvel e-mail du chauffeur.');return;}
+  var ancien=prompt('Quelle est l\'ANCIENNE adresse du chauffeur (celle qui reçoit encore des messages) ?');
+  if(!ancien||!ancien.trim())return;
+  busy_(true);
+  apiCall('corrigerInvitesChauffeur',[ancien.trim()]).then(function(r){busy_(false);showToast(r.n+' trajet(s) à venir : '+ancien.trim()+' remplacé par '+r.email,null,null,6000);},function(e){busy_(false);alert(e.message||e);});
 }
 function donnerAccesChauffeur_(){
   var e=v('cfg-email-t').trim();
@@ -2871,6 +2881,7 @@ function aideRender_(){
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAide();});
 var NOUVEAUTES=[
+  ['2026.10.17','Chauffeur : quand tu changes son e-mail, les trajets à venir de l\'agenda passent à la nouvelle adresse (l\'ancienne n\'est plus invitée) ; bouton « Remplacer l\'ancien invité » si l\'e-mail avait déjà été changé.'],
   ['2026.10.16','Chauffeur : nouvelle page « Chauffeur » pour relire l\'historique des trajets et les corriger. Seuls les trajets que tu confirmes comme faits par le chauffeur sont payables : les séances déjà cochées avant sont « à confirmer » (bouton « Tout confirmer » ou un par un).'],
   ['2026.10.15','Alerte « la veille » : l\'heure se choisit dans les Réglages (20h00 par défaut). Pour les séances déjà dans l\'agenda : « Tout resynchroniser ».'],
   ['2026.10.14','Chauffeur : des pastilles montrent les trajets du mois (vert = fait par le chauffeur, cerclé d\'orange tant qu\'il n\'est pas payé, barré = pas fait par lui, clair = à faire), sur l\'accueil de la famille et dans l\'espace du chauffeur, qui voit aussi les trajets non effectués.'],
